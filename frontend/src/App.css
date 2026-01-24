@@ -1,0 +1,159 @@
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  /* Custom Node Editor Colors */
+  --color-node-bg: hsl(var(--node-bg));
+  --color-node-border: hsl(var(--node-border));
+  --color-node-header: hsl(var(--node-header));
+  
+  --color-handle-input: hsl(var(--handle-input));
+  --color-handle-output: hsl(var(--handle-output));
+  --color-handle-api: hsl(var(--handle-api));
+
+  --color-canvas-bg: hsl(var(--canvas-bg));
+  --color-canvas-dots: hsl(var(--canvas-dots));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+/* Variable Definitions (The "Polished" Palette)
+*/
+@layer base {
+  :root {
+    --background: 220 20% 97%;
+    --foreground: 220 20% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 10%;
+    --primary: 250 84% 54%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 20% 10%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 10% 46%;
+    --accent: 172 66% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 250 84% 54%;
+    --radius: 0.75rem;
+
+    /* Node Specifics */
+    --node-bg: 0 0% 100%;
+    --node-border: 220 13% 88%;
+    --node-header: 220 14% 96%;
+    --node-shadow: 220 20% 10%;
+    --handle-input: 250 84% 54%;
+    --handle-output: 172 66% 50%;
+    --handle-api: 35 92% 50%;
+    --canvas-bg: 220 20% 97%;
+    --canvas-dots: 220 13% 85%;
+  }
+
+  .dark {
+    --background: 224 32% 8%;
+    --foreground: 210 40% 98%;
+    --card: 224 32% 12%;
+    --card-foreground: 210 40% 98%;
+    --popover: 224 32% 12%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 250 84% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 224 32% 16%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 224 32% 16%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 172 66% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 224 32% 20%;
+    --input: 224 32% 20%;
+    --ring: 250 84% 60%;
+    --node-bg: 224 32% 12%;
+    --node-border: 224 32% 22%;
+    --node-header: 224 32% 16%;
+    --node-shadow: 0 0% 0%;
+    --handle-input: 250 84% 60%;
+    --handle-output: 172 66% 50%;
+    --handle-api: 35 92% 50%;
+    --canvas-bg: 224 32% 8%;
+    --canvas-dots: 224 32% 16%;
+  }
+}
+
+/* Base Styles */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+/* Component Classes */
+@layer components {
+  .node-card {
+    @apply bg-card border border-node-border rounded-xl shadow-lg;
+    box-shadow: 0 4px 20px -4px hsl(var(--node-shadow) / 0.1);
+  }
+  
+  .node-header {
+    @apply px-3 py-2 bg-node-header border-b border-node-border rounded-t-xl font-semibold text-sm flex items-center gap-2;
+  }
+  
+  .node-body {
+    @apply p-3;
+  }
+  
+  .handle-input {
+    @apply !bg-handle-input !border-2 !border-white !w-3 !h-3;
+  }
+  
+  .handle-output {
+    @apply !bg-handle-output !border-2 !border-white !w-3 !h-3;
+  }
+  
+  .handle-api {
+    @apply !bg-handle-api !border-2 !border-white !w-3 !h-3;
+  }
+}
