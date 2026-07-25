@@ -1,10 +1,72 @@
-
 import { useReactFlow } from 'reactflow';
-import { Send, Loader2, GitBranch, Share2, Variable, CheckCircle2, XCircle } from 'lucide-react';
+import {
+  Send,
+  Loader2,
+  GitBranch,
+  Share2,
+  Variable,
+  CheckCircle2,
+  XCircle,
+} from 'lucide-react';
 import { useState } from 'react';
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
-const API_URL = 'http://localhost:8000/pipelines/parse';
+const analyzePipeline = (nodes, edges) => {
+  const adjacency = new Map();
+  const indegree = new Map();
+
+  for (const node of nodes) {
+    adjacency.set(node.id, []);
+    indegree.set(node.id, 0);
+  }
+
+  for (const edge of edges) {
+    const source = edge.source;
+    const target = edge.target;
+
+    if (!adjacency.has(source)) adjacency.set(source, []);
+    if (!adjacency.has(target)) adjacency.set(target, []);
+
+    if (!indegree.has(source)) indegree.set(source, 0);
+    if (!indegree.has(target)) indegree.set(target, 0);
+
+    adjacency.get(source).push(target);
+    indegree.set(target, indegree.get(target) + 1);
+  }
+
+  const queue = [];
+  for (const [nodeId, degree] of indegree.entries()) {
+    if (degree === 0) queue.push(nodeId);
+  }
+
+  let visitedCount = 0;
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    visitedCount++;
+
+    for (const neighbor of adjacency.get(current) || []) {
+      indegree.set(neighbor, indegree.get(neighbor) - 1);
+      if (indegree.get(neighbor) === 0) {
+        queue.push(neighbor);
+      }
+    }
+  }
+
+  return {
+    num_nodes: nodes.length,
+    num_edges: edges.length,
+    is_dag: visitedCount === indegree.size,
+  };
+};
 
 export const SubmitButton = () => {
   const { getNodes, getEdges } = useReactFlow();
@@ -21,24 +83,12 @@ export const SubmitButton = () => {
     setError(null);
 
     try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ nodes, edges }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setResult(data);
+      const analysis = analyzePipeline(nodes, edges);
+      setResult(analysis);
       setDialogOpen(true);
     } catch (err) {
-      console.error('Error submitting pipeline:', err);
-      setError(`Could not connect to backend.\nMake sure the FastAPI server is running at:\n${API_URL}`);
+      console.error('Error analyzing pipeline:', err);
+      setError('Could not analyze the pipeline on the client side.');
       setDialogOpen(true);
     } finally {
       setIsLoading(false);
@@ -67,7 +117,7 @@ export const SubmitButton = () => {
               {error ? (
                 <>
                   <XCircle className="h-5 w-5 text-destructive" />
-                  Connection Error
+                  Analysis Error
                 </>
               ) : (
                 <>
@@ -76,6 +126,7 @@ export const SubmitButton = () => {
                 </>
               )}
             </AlertDialogTitle>
+
             <AlertDialogDescription asChild>
               {error ? (
                 <div className="text-muted-foreground whitespace-pre-line mt-2">
@@ -84,16 +135,19 @@ export const SubmitButton = () => {
               ) : result ? (
                 <div className="space-y-4 mt-4 w-full">
                   <div className="flex w-full items-center justify-between gap-4">
-                    
                     <div className="flex-1 flex flex-col items-center p-4 rounded-xl bg-primary/10 border border-primary/20 min-w-[100px]">
                       <GitBranch className="h-6 w-6 text-primary mb-2" />
-                      <span className="text-2xl font-bold text-foreground">{result.num_nodes}</span>
+                      <span className="text-2xl font-bold text-foreground">
+                        {result.num_nodes}
+                      </span>
                       <span className="text-xs text-muted-foreground">Nodes</span>
                     </div>
 
                     <div className="flex-1 flex flex-col items-center p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 min-w-[100px]">
                       <Share2 className="h-6 w-6 text-blue-500 mb-2" />
-                      <span className="text-2xl font-bold text-foreground">{result.num_edges}</span>
+                      <span className="text-2xl font-bold text-foreground">
+                        {result.num_edges}
+                      </span>
                       <span className="text-xs text-muted-foreground">Edges</span>
                     </div>
 
@@ -102,13 +156,12 @@ export const SubmitButton = () => {
                       <span className="text-2xl font-bold text-foreground">
                         {result.is_dag ? 'Yes' : 'No'}
                       </span>
-                      <span className="text-xs text-muted-foreground">Is DAG</span>
+                      <span className="text-xs text-muted-foreground">Is DAG?</span>
                     </div>
-
                   </div>
 
                   <p className="text-xs text-muted-foreground text-center pt-2">
-                    {result.is_dag 
+                    {result.is_dag
                       ? '✓ Valid directed acyclic graph - no cycles detected'
                       : '⚠ Cycles detected in the graph structure'}
                   </p>
@@ -116,6 +169,7 @@ export const SubmitButton = () => {
               ) : null}
             </AlertDialogDescription>
           </AlertDialogHeader>
+
           <AlertDialogFooter>
             <AlertDialogAction className="bg-primary hover:bg-primary/90 w-full sm:w-auto">
               Got it

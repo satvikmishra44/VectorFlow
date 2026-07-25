@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Position, Handle } from 'reactflow';
+import { Position, Handle, useUpdateNodeInternals } from 'reactflow';
 import { Type } from 'lucide-react';
 import BaseNode from './BaseNode';
 
@@ -9,12 +9,17 @@ const VARIABLE_REGEX = /\{\{\s*(\w+)\s*\}\}/g;
 export const TextNode = ({ id, data, selected }) => {
   const [text, setText] = useState(data.text || '');
   const textareaRef = useRef(null);
+  const updateNodeInternals = useUpdateNodeInternals();
 
   const variables = useMemo(() => {
     const matches = [...text.matchAll(VARIABLE_REGEX)];
     const uniqueVars = [...new Set(matches.map((m) => m[1]))];
     return uniqueVars;
   }, [text]);
+
+  useEffect(() => {
+    updateNodeInternals(id);
+  }, [id, variables, updateNodeInternals]);
 
   // This Is The Adjusting Textarea That You Gave Me In Assignment
   const adjustHeight = useCallback(() => {
@@ -45,7 +50,7 @@ export const TextNode = ({ id, data, selected }) => {
           id={`api-${variable}`}
           className="w-3 h-3 border-2 border-card handle-api transition-transform hover:scale-125"
           style={{
-            top: `${50 + index * 24}px`,
+            top: `${65 + index * 30}px`,
           }}
           title={variable}
         />
